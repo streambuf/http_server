@@ -4,7 +4,7 @@
 .mtj.tmp/
 
 # Package Files #
-*.jar
+#*.jar
 *.war
 *.ear
 
@@ -16,3 +16,4 @@ compile/
 out/
 httpd.sh
 *.iml
+httpd.jar
