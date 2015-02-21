@@ -1,3 +1,6 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -11,6 +14,7 @@ public class ExecutorTaskService {
     private final List<ExecutorTask> executors = new ArrayList<ExecutorTask>();
     private final Queue taskQueue = new LinkedBlockingQueue();
     private final int numExecutors;
+    private static Logger log = LoggerFactory.getLogger("ExecutorTaskService");
 
     public ExecutorTaskService(int numExecutors) {
         this.numExecutors = numExecutors;
@@ -48,7 +52,7 @@ public class ExecutorTaskService {
                 try {
                     task.run();
                 } catch (RuntimeException e) {
-                    System.out.println(e.getMessage());
+                    log.error(e.getMessage());
                 }
             }
         }

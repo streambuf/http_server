@@ -1,4 +1,4 @@
 Manifest-version: 1.0
 Main-Class: Server
-Class-Path: lib/jcommander-1.30.jar
+Class-Path: lib/jcommander-1.30.jar lib/logback-classic-1.1.2.jar lib/logback-core-1.1.2.jar lib/slf4j-api-1.7.10.jar
 
