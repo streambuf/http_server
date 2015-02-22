@@ -2,6 +2,8 @@ import ch.qos.logback.classic.Level;
 import com.beust.jcommander.JCommander;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import service.ExecutorTaskService;
+import service.Task;
 import utils.commandLine.CommandLineParser;
 
 import java.net.ServerSocket;
@@ -18,12 +20,12 @@ public class Server {
 
     public static void main(String[] args) throws Throwable {
         configureServer(args);
-        ExecutorTaskService threadPool = new ExecutorTaskService(20);
+        ExecutorTaskService threadPool = new ExecutorTaskService(4);
         ServerSocket ss = new ServerSocket(8080);
 
         while (true) {
             Socket s = ss.accept();
-            threadPool.execute(new HandlerSocket(s, rootDir));
+            threadPool.execute(new Task(s, rootDir));
         }
 
     }
