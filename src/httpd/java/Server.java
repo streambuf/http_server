@@ -12,17 +12,19 @@ import java.net.Socket;
 /**
  * Created by max on 19.02.15.
  */
+@SuppressWarnings("WeakerAccess")
 public class Server {
 
     private static String rootDir;
     private static String debug;
-    private static Logger log = LoggerFactory.getLogger("Server");
+    private static final Logger log = LoggerFactory.getLogger("Server");
 
-    public static void main(String[] args) throws Throwable {
+    public static void main(String[] args) throws Exception {
         configureServer(args);
         ExecutorTaskService threadPool = new ExecutorTaskService(4);
         ServerSocket ss = new ServerSocket(8080);
 
+        //noinspection InfiniteLoopStatement
         while (true) {
             Socket s = ss.accept();
             threadPool.execute(new Task(s, rootDir));
@@ -50,7 +52,7 @@ public class Server {
         }
     }
 
-    public static void setLoggingLevel(ch.qos.logback.classic.Level level) {
+    private static void setLoggingLevel(ch.qos.logback.classic.Level level) {
         ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
         root.setLevel(level);
     }

@@ -14,11 +14,11 @@ import java.net.Socket;
  * Created by max on 20.02.15.
  */
 public class Task implements Runnable {
-    private Socket socket;
-    private String rootDir;
-    private InputStream in;
-    private OutputStream out;
-    private static Logger log = LoggerFactory.getLogger("service.Task");
+    private final Socket socket;
+    private final String rootDir;
+    private final InputStream in;
+    private final OutputStream out;
+    private static final Logger log = LoggerFactory.getLogger("service.Task");
 
     public Task(Socket socket, String rootDir) throws Exception {
         this.socket = socket;
@@ -36,6 +36,12 @@ public class Task implements Runnable {
             log.debug("Was ended request handling");
         } catch (Exception e) {
             log.debug("Error processing the request");
+        } finally {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                log.debug("Error closing the socket");
+            }
         }
     }
 

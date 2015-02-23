@@ -1,9 +1,5 @@
 package service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import service.ExecutorTask;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -14,13 +10,11 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class ExecutorTaskService {
 
-    private final List<ExecutorTask> executors = new ArrayList<ExecutorTask>();
-    private final Queue taskQueue = new LinkedBlockingQueue();
-    private final int numExecutors;
-    private static Logger log = LoggerFactory.getLogger("service.ExecutorTaskService");
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+    private final List<ExecutorTask> executors = new ArrayList<>();
+    private final Queue<Runnable> taskQueue = new LinkedBlockingQueue<>();
 
-    public ExecutorTaskService(int numExecutors) {
-        this.numExecutors = numExecutors;
+    public ExecutorTaskService(@SuppressWarnings("SameParameterValue") int numExecutors) {
 
         for (int i = 0; i < numExecutors; ++i) {
             ExecutorTask executorTask = new ExecutorTask(taskQueue);
@@ -36,11 +30,4 @@ public class ExecutorTaskService {
         }
     }
 
-    public int getNumExecutors() {
-        return numExecutors;
-    }
-
-    public Queue getTaskQueue() {
-        return taskQueue;
-    }
 }

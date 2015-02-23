@@ -8,6 +8,7 @@ import utils.commandLine.validators.RootDirValidator;
 /**
  * Created by max on 19.02.15.
  */
+@SuppressWarnings("CanBeFinal")
 public class CommandLineParser {
     @Parameter(names = { "-r"}, description = "ROOTDIR", validateWith = RootDirValidator.class)
     private String rootDir = "/home/max";

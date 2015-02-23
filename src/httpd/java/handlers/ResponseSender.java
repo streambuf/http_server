@@ -12,9 +12,7 @@ import java.util.TimeZone;
  */
 public class ResponseSender {
 
-    private static final String[] ALLOWED_METHODS = {"GET", "HEAD"};
-    private OutputStream out;
-    private ResponseStatusCode STATUS;
+    private final OutputStream out;
 
     public ResponseSender(OutputStream out) {
         this.out = out;
@@ -22,17 +20,21 @@ public class ResponseSender {
 
     public void sendResponseToClient(DataForResponse data) throws IOException {
         String method = data.getMethod();
-        String headers = new String();
+        String pathToFile = data.getPathToFile();
+        String headers;
+
         switch(method) {
             case "GET":
-                headers = buildHeader(STATUS.OK);
+                headers = buildHeader(ResponseStatusCode.OK);
+                writeResponse(headers + ResponseStatusCode.OK);
                 break;
             case "HEAD":
                 break;
             default:
-                headers = buildHeader(STATUS.METHOD_NOT_ALLOWED);
+                headers = buildHeader(ResponseStatusCode.METHOD_NOT_ALLOWED);
+                writeResponse(headers + ResponseStatusCode.METHOD_NOT_ALLOWED);
         }
-        writeResponse(headers);
+
     }
 
     private String buildHeader(String status) {
