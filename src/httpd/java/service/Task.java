@@ -1,5 +1,6 @@
 package service;
 
+import handlers.DataForResponse;
 import handlers.RequestHandler;
 import handlers.ResponseSender;
 import org.slf4j.Logger;
@@ -29,8 +30,9 @@ public class Task implements Runnable {
     public void run() {
         try {
             log.debug("Was started request handling");
-            String taskToResponse = RequestHandler.parsingHeadersHTTP(in);
-            ResponseSender.sendResponseToClient(out, taskToResponse);
+            DataForResponse data = RequestHandler.parsingHeadersHTTP(in);
+            ResponseSender sender = new ResponseSender(out);
+            sender.sendResponseToClient(data);
             log.debug("Was ended request handling");
         } catch (Exception e) {
             log.debug("Error processing the request");
