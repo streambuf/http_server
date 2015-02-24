@@ -11,7 +11,7 @@ import utils.commandLine.validators.RootDirValidator;
 @SuppressWarnings("CanBeFinal")
 public class CommandLineParser {
     @Parameter(names = { "-r"}, description = "ROOTDIR", validateWith = RootDirValidator.class)
-    private String rootDir = "/home/max";
+    private String rootDir = "/home/max/workspace/git/httpserver/static/";
 
     @Parameter(names = { "-c"}, description = "NCPU", validateWith = NCPUValidator.class)
     private Integer numCPU = 1;

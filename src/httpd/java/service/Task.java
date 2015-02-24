@@ -31,11 +31,12 @@ public class Task implements Runnable {
         try {
             log.debug("Was started request handling");
             DataForResponse data = RequestHandler.parsingHeadersHTTP(in);
-            ResponseSender sender = new ResponseSender(out);
+            ResponseSender sender = new ResponseSender(out, rootDir);
             sender.sendResponseToClient(data);
             log.debug("Was ended request handling");
         } catch (Exception e) {
-            log.debug("Error processing the request");
+            log.debug("Error processing the request: " + e.getMessage());
+            e.printStackTrace();
         } finally {
             try {
                 socket.close();

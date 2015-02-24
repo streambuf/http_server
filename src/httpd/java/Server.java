@@ -23,7 +23,6 @@ public class Server {
         configureServer(args);
         ExecutorTaskService threadPool = new ExecutorTaskService(4);
         ServerSocket ss = new ServerSocket(8080);
-
         //noinspection InfiniteLoopStatement
         while (true) {
             Socket s = ss.accept();
