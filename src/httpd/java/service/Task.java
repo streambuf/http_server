@@ -36,7 +36,6 @@ public class Task implements Runnable {
             log.debug("Was ended request handling");
         } catch (Exception e) {
             log.debug("Error processing the request: " + e.getMessage());
-            e.printStackTrace();
         } finally {
             try {
                 socket.close();

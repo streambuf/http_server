@@ -13,7 +13,7 @@ public class FileReader {
 
     public static ByteBuffer read(String pathToFile) throws Exception {
         File file = new File(pathToFile);
-        if (!file.exists()) {
+        if (!file.exists()||file.isDirectory()) {
             return null;
         }
         RandomAccessFile aFile = new RandomAccessFile(pathToFile, "r");
