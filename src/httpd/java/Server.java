@@ -5,9 +5,12 @@ import org.slf4j.LoggerFactory;
 import service.ExecutorTaskService;
 import service.Task;
 import utils.commandLine.CommandLineParser;
-
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.StandardSocketOptions;
+import java.nio.channels.AsynchronousServerSocketChannel;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.CompletionHandler;
 
 /**
  * Created by max on 19.02.15.
@@ -15,19 +18,41 @@ import java.net.Socket;
 @SuppressWarnings("WeakerAccess")
 public class Server {
 
+    private static final int PORT = 8080;
+    private static final int NUM_THREADS = 30;
     private static String rootDir;
     private static String debug;
     private static final Logger log = LoggerFactory.getLogger("Server");
 
     public static void main(String[] args) throws Exception {
         configureServer(args);
-        ExecutorTaskService threadPool = new ExecutorTaskService(10);
-        ServerSocket ss = new ServerSocket(8080);
-        //noinspection InfiniteLoopStatement
-        while (true) {
-            Socket s = ss.accept();
-            threadPool.execute(new Task(s, rootDir));
-        }
+        ExecutorTaskService threadPool = new ExecutorTaskService(NUM_THREADS);
+
+        final AsynchronousServerSocketChannel listener =
+                AsynchronousServerSocketChannel.open().bind(new InetSocketAddress(PORT));
+
+        listener.accept(null, new CompletionHandler<AsynchronousSocketChannel, Void>() {
+            @Override
+            public void completed(AsynchronousSocketChannel ch, Void att) {
+                try {
+                    listener.accept(null, this);
+                    ch.setOption(StandardSocketOptions.TCP_NODELAY, true);
+                    threadPool.execute(new Task(ch, rootDir));
+                } catch (Exception e) {
+                    log.debug(e.getMessage());
+                    try {
+                        ch.close();
+                    } catch (IOException ee) {
+                        log.debug(ee.getMessage());
+                    }
+                }
+            }
+
+            @Override
+            public void failed(Throwable exc, Void att) {
+                log.debug("failed: " + exc.getMessage());
+            }
+        });
 
     }
 

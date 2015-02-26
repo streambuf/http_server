@@ -4,8 +4,6 @@ import handlers.helpers.ContentType;
 import handlers.helpers.DataForResponse;
 import handlers.helpers.StatusCode;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -15,21 +13,19 @@ import java.util.TimeZone;
 /**
  * Created by max on 22.02.15.
  */
-public class ResponseSender {
+public class ResponseBuilder {
 
-    private final OutputStream out;
     private final String rootDir;
 
     private static final String DEFAULT_FILE = "index.html";
     private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss z";
     private static final String TIMEZONE = "GMT";
 
-    public ResponseSender(OutputStream out, String rootDir) {
-        this.out = out;
+    public ResponseBuilder(String rootDir) {
         this.rootDir = rootDir;
     }
 
-    public void sendResponseToClient(DataForResponse data) throws Exception {
+    public ByteBuffer sendResponseToClient(DataForResponse data) throws Exception {
         String method = data.getMethod();
         String pathToFile = data.getPathToFile();
 
@@ -70,7 +66,15 @@ public class ResponseSender {
         if (method.equals("HEAD")) {
             file = ByteBuffer.allocate(0);
         }
-        writeResponse(headers, file);
+
+        ByteBuffer bufHeaders = ByteBuffer.wrap(headers.getBytes());
+        ByteBuffer response = ByteBuffer.allocate(bufHeaders.limit() + file.limit());
+        response.put(bufHeaders);
+        byte[] bf = file.array();
+        response.put(bf);
+        response.flip();
+
+        return response;
     }
 
     private String buildHeader(String status, int contentLength, String contentType) {
@@ -89,12 +93,6 @@ public class ResponseSender {
         ByteBuffer file = ByteBuffer.allocate(status.length());
         file.put(status.getBytes());
         return file;
-    }
-
-    private void writeResponse(String response, ByteBuffer file) throws IOException {
-        out.write(response.getBytes());
-        out.write(file.array());
-        out.flush();
     }
 
     private String getServerDateTime() {
