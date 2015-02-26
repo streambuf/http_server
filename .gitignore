@@ -18,3 +18,4 @@ httpd.sh
 *.iml
 httpd.jar
 static/
+test/

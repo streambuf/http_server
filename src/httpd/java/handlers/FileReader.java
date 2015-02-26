@@ -13,7 +13,8 @@ public class FileReader {
 
     public static ByteBuffer read(String pathToFile) throws Exception {
         File file = new File(pathToFile);
-        if (!file.exists()||file.isDirectory()) {
+
+        if (!file.exists()) {
             return null;
         }
         RandomAccessFile aFile = new RandomAccessFile(pathToFile, "r");
@@ -26,6 +27,11 @@ public class FileReader {
         inChannel.close();
         aFile.close();
         return result;
+    }
+
+    public static Boolean isDirectory(String pathToDirectory) {
+        File file = new File(pathToDirectory);
+        return file.isDirectory();
     }
 
 }

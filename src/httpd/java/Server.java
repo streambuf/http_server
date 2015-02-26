@@ -21,7 +21,7 @@ public class Server {
 
     public static void main(String[] args) throws Exception {
         configureServer(args);
-        ExecutorTaskService threadPool = new ExecutorTaskService(4);
+        ExecutorTaskService threadPool = new ExecutorTaskService(10);
         ServerSocket ss = new ServerSocket(8080);
         //noinspection InfiniteLoopStatement
         while (true) {

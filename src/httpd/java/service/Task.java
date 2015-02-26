@@ -1,6 +1,6 @@
 package service;
 
-import handlers.DataForResponse;
+import handlers.helpers.DataForResponse;
 import handlers.RequestHandler;
 import handlers.ResponseSender;
 import org.slf4j.Logger;
