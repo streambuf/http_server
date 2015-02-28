@@ -4,7 +4,7 @@ package handlers.helpers;
  * Created by max on 23.02.15.
  */
 
-public class DataForResponse {
+public class DataForResponseBuilder {
 
     private String pathToFile;
     private String method;

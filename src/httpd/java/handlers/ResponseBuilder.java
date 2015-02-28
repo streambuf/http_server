@@ -1,7 +1,8 @@
 package handlers;
 
 import handlers.helpers.ContentType;
-import handlers.helpers.DataForResponse;
+import handlers.helpers.DataForClient;
+import handlers.helpers.DataForResponseBuilder;
 import handlers.helpers.StatusCode;
 
 import java.nio.ByteBuffer;
@@ -25,35 +26,38 @@ public class ResponseBuilder {
         this.rootDir = rootDir;
     }
 
-    public ByteBuffer sendResponseToClient(DataForResponse data) throws Exception {
+    public DataForClient getResponseToClient(DataForResponseBuilder data) throws Exception {
         String method = data.getMethod();
         String pathToFile = data.getPathToFile();
 
         boolean isDirectory = false;
         String status;
-        ByteBuffer file;
+        long fileSize = 0L;
+        ByteBuffer file = ByteBuffer.allocate(0);
         String contentType = ContentType.getContentType(".html");
 
         if (method.equals("GET") || method.equals("HEAD")) {
             if (pathToFile.contains("../")) {
                 status = StatusCode.FORBIDDEN;
                 file = buildFile(status);
+                fileSize = file.limit();
             } else {
-                if (FileReader.isDirectory(rootDir + pathToFile)) {
+                if (FileInformation.isDirectory(rootDir + pathToFile)) {
                     isDirectory = true;
                     if (!pathToFile.substring(pathToFile.length() - 1).equals("/")) {
                         pathToFile +="/";
                     }
                     pathToFile += DEFAULT_FILE;
                 }
-                file = FileReader.read(rootDir + pathToFile);
-                if (file != null) {
+                fileSize = FileInformation.read(rootDir + pathToFile);
+                if (fileSize != 0L) {
                     status = StatusCode.OK;
                     String extension = pathToFile.substring(pathToFile.lastIndexOf('.'));
                     contentType = ContentType.getContentType(extension);
                 } else {
                     status = isDirectory ? StatusCode.FORBIDDEN : StatusCode.NOT_FOUND;
                     file = buildFile(status);
+                    fileSize = file.limit();
                 }
             }
 
@@ -62,7 +66,7 @@ public class ResponseBuilder {
             file = buildFile(status);
         }
 
-        String headers = buildHeader(status, file.limit(), contentType);
+        String headers = buildHeader(status, fileSize, contentType);
         if (method.equals("HEAD")) {
             file = ByteBuffer.allocate(0);
         }
@@ -73,11 +77,12 @@ public class ResponseBuilder {
         byte[] bf = file.array();
         response.put(bf);
         response.flip();
+        DataForClient dataForClient = new DataForClient(response, status, rootDir + pathToFile);
 
-        return response;
+        return dataForClient;
     }
 
-    private String buildHeader(String status, int contentLength, String contentType) {
+    private String buildHeader(String status, long contentLength, String contentType) {
         String rn = "\r\n";
         StringBuilder headers = new StringBuilder();
         headers.append("HTTP/1.1 " + status + rn);

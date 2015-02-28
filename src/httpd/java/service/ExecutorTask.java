@@ -29,10 +29,8 @@ class ExecutorTask extends Thread {
                         log.debug(e.getMessage());
                     }
                 }
-
                 task = (Runnable) taskQueue.poll();
             }
-
             try {
                 task.run();
             } catch (RuntimeException e) {

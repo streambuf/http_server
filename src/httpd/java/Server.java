@@ -19,7 +19,7 @@ import java.nio.channels.CompletionHandler;
 public class Server {
 
     private static final int PORT = 8080;
-    private static final int NUM_THREADS = 30;
+    private static final int NUM_THREADS = 2;
     private static String rootDir;
     private static String debug;
     private static final Logger log = LoggerFactory.getLogger("Server");
@@ -37,6 +37,8 @@ public class Server {
                 try {
                     listener.accept(null, this);
                     ch.setOption(StandardSocketOptions.TCP_NODELAY, true);
+                    ch.setOption(StandardSocketOptions.SO_SNDBUF, 1024*1024);
+                    ch.setOption(StandardSocketOptions.SO_RCVBUF, 1024*1024);
                     threadPool.execute(new Task(ch, rootDir));
                 } catch (Exception e) {
                     log.debug(e.getMessage());
