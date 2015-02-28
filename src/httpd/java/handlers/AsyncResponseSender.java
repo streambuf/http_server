@@ -17,21 +17,21 @@ import java.nio.channels.FileChannel;
 /**
  * Created by max on 28.02.15.
  */
-public class AsyncResponseSender implements CompletionHandler<Integer, ByteBuffer> {
+class AsyncResponseSender implements CompletionHandler<Integer, ByteBuffer> {
 
-    private static final Logger log = LoggerFactory.getLogger("handlers.AsynchronousResponseSender");
-    AsynchronousSocketChannel connection;
-    DataForClient data;
-    ByteBuffer buffer = ByteBuffer.allocate(256 * 1024);
-    boolean fileExists = false;
-    FileChannel ch;
-    RandomAccessFile aFile;
+    private static final Logger log = LoggerFactory.getLogger("handlers.AsyncResponseSender");
+    private static final int READ_BUFFER_SIZE = 256 * 1024;
+    private final ByteBuffer buffer = ByteBuffer.allocate(READ_BUFFER_SIZE);
+
+    private final AsynchronousSocketChannel connection;
+    private boolean fileExists = false;
+    private FileChannel ch;
+    private RandomAccessFile aFile;
 
     public AsyncResponseSender(AsynchronousSocketChannel connection, DataForClient data)
             throws IOException{
 
         this.connection = connection;
-        this.data = data;
 
         if (data.getCode().equals(StatusCode.OK)) {
             fileExists = true;

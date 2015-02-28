@@ -14,7 +14,7 @@ import java.util.TimeZone;
 /**
  * Created by max on 22.02.15.
  */
-public class ResponseBuilder {
+class ResponseBuilder {
 
     private final String rootDir;
 
@@ -26,7 +26,7 @@ public class ResponseBuilder {
         this.rootDir = rootDir;
     }
 
-    public DataForClient getResponseToClient(DataForResponseBuilder data) throws Exception {
+    public DataForClient getResponseForClient(DataForResponseBuilder data) {
         String method = data.getMethod();
         String pathToFile = data.getPathToFile();
 
@@ -77,20 +77,20 @@ public class ResponseBuilder {
         byte[] bf = file.array();
         response.put(bf);
         response.flip();
-        DataForClient dataForClient = new DataForClient(response, status, rootDir + pathToFile);
 
-        return dataForClient;
+        return new DataForClient(response, status, rootDir + pathToFile);
     }
 
     private String buildHeader(String status, long contentLength, String contentType) {
         String rn = "\r\n";
+        @SuppressWarnings("StringBufferReplaceableByString")
         StringBuilder headers = new StringBuilder();
-        headers.append("HTTP/1.1 " + status + rn);
-        headers.append("Server: http_server" + rn);
-        headers.append("Date:" + getServerDateTime() + rn);
-        headers.append("Content-Type: " + contentType + rn);
-        headers.append("Content-Length: " + contentLength + rn);
-        headers.append("Connection: close" + rn + rn);
+        headers.append("HTTP/1.1 ").append(status).append(rn);
+        headers.append("Server: http_server").append(rn);
+        headers.append("Date:").append(getServerDateTime()).append(rn);
+        headers.append("Content-Type: ").append(contentType).append(rn);
+        headers.append("Content-Length: ").append(contentLength).append(rn);
+        headers.append("Connection: close").append(rn).append(rn);
         return headers.toString();
     }
 

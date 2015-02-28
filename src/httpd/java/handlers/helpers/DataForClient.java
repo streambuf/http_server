@@ -7,9 +7,9 @@ import java.nio.ByteBuffer;
  */
 public class DataForClient {
 
-    ByteBuffer response;
-    String code;
-    String pathToFile;
+    private final ByteBuffer response;
+    private final String code;
+    private final String pathToFile;
 
 
     public DataForClient(ByteBuffer response, String code, String pathToFile) {
@@ -28,10 +28,6 @@ public class DataForClient {
 
     public String getPathToFile() {
         return pathToFile;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
     }
 
 }

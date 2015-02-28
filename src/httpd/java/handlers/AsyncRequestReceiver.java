@@ -14,9 +14,9 @@ import java.nio.channels.CompletionHandler;
  */
 public class AsyncRequestReceiver implements CompletionHandler<Integer, ByteBuffer> {
 
-    private static final Logger log = LoggerFactory.getLogger("handlers.AsynchronousRequestReceiver");
-    AsynchronousSocketChannel connection;
-    String rootDir;
+    private static final Logger log = LoggerFactory.getLogger("handlers.AsyncRequestReceiver");
+    private final AsynchronousSocketChannel connection;
+    private final String rootDir;
 
     public AsyncRequestReceiver(AsynchronousSocketChannel connection, String rootDir) {
         this.connection = connection;
@@ -28,7 +28,7 @@ public class AsyncRequestReceiver implements CompletionHandler<Integer, ByteBuff
         try {
             DataForResponseBuilder data = RequestHandler.parsingHeadersHTTP(attachment);
             ResponseBuilder sender = new ResponseBuilder(rootDir);
-            DataForClient dataForClient = sender.getResponseToClient(data);
+            DataForClient dataForClient = sender.getResponseForClient(data);
             ByteBuffer buffer = (dataForClient.getResponse());
             connection.write(buffer, buffer,
                     new AsyncResponseSender(connection, dataForClient));

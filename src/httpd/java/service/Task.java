@@ -10,12 +10,13 @@ import java.nio.channels.AsynchronousSocketChannel;
  * Created by max on 20.02.15.
  */
 public class Task implements Runnable {
+
     private final AsynchronousSocketChannel connection;
     private final String rootDir;
-
     private static final Logger log = LoggerFactory.getLogger("service.Task");
+    private static final int READ_BUFFER_SIZE = 500;
 
-    public Task(AsynchronousSocketChannel connection, String rootDir) throws Exception {
+    public Task(AsynchronousSocketChannel connection, String rootDir) {
         this.connection = connection;
         this.rootDir = rootDir;
     }
@@ -23,7 +24,7 @@ public class Task implements Runnable {
     public void run() {
         try {
             log.debug("Was started request handling");
-            ByteBuffer buffer = ByteBuffer.allocateDirect(500);
+            ByteBuffer buffer = ByteBuffer.allocateDirect(READ_BUFFER_SIZE);
             connection.read(buffer, buffer, new AsyncRequestReceiver(connection, rootDir));
 
         } catch (Exception e) {
