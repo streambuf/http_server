@@ -20,8 +20,10 @@ import java.nio.channels.FileChannel;
 class AsyncResponseSender implements CompletionHandler<Integer, ByteBuffer> {
 
     private static final Logger log = LoggerFactory.getLogger("handlers.AsyncResponseSender");
-    private static final int READ_BUFFER_SIZE = 256 * 1024;
-    private final ByteBuffer buffer = ByteBuffer.allocate(READ_BUFFER_SIZE);
+    private static final int BUF_SIZE = 256 * 1024;
+    private static final int SMALL_BUF_SIZE = 100;
+    private static final int BIG_FILE = 1024 * 1024;
+    private ByteBuffer buffer;
 
     private final AsynchronousSocketChannel connection;
     private boolean fileExists = false;
@@ -33,11 +35,13 @@ class AsyncResponseSender implements CompletionHandler<Integer, ByteBuffer> {
 
         this.connection = connection;
 
-        if (data.getCode().equals(StatusCode.OK)) {
+        if (data.getCode().equals(StatusCode.OK) && data.getMethod().equals("GET")) {
             fileExists = true;
             File file = new File(data.getPathToFile());
             aFile = new RandomAccessFile(file, "r");
             ch = aFile.getChannel();
+            int bufferSize = data.getFileSize() < BIG_FILE ? BUF_SIZE : SMALL_BUF_SIZE;
+            buffer = ByteBuffer.allocate(bufferSize);
         }
     }
 
@@ -47,16 +51,21 @@ class AsyncResponseSender implements CompletionHandler<Integer, ByteBuffer> {
             if (attachment.hasRemaining()) {
                 connection.write(buffer, buffer, this);
             }
-            buffer.clear();
-            if (fileExists && ch.read(buffer) > 0) {
-                buffer.flip();
-                connection.write(buffer, buffer, this);
-            } else try {
+            if (fileExists) {
+                buffer.clear();
+                if (ch.read(buffer) > 0) {
+                    buffer.flip();
+                    connection.write(buffer, buffer, this);
+                }
+            }
+            try {
                 log.debug("Was ended request handling");
                 connection.close();
-                buffer.clear();
-                ch.close();
-                aFile.close();
+                if (fileExists) {
+                    buffer.clear();
+                    ch.close();
+                    aFile.close();
+                }
             } catch (IOException e) {
                 log.debug("Error closing the socket");
             }

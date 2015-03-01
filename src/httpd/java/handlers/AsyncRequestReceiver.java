@@ -34,7 +34,7 @@ public class AsyncRequestReceiver implements CompletionHandler<Integer, ByteBuff
                     new AsyncResponseSender(connection, dataForClient));
 
         } catch (Exception e) {
-            log.debug("parsingHeadersHTTP exception");
+            log.debug(e.getMessage());
         }
     }
 

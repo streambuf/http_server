@@ -28,31 +28,23 @@ class ResponseBuilder {
 
     public DataForClient getResponseForClient(DataForResponseBuilder data) {
         String method = data.getMethod();
-        String pathToFile = data.getPathToFile();
+        StringBuilder pathToFile = new StringBuilder(rootDir + data.getPathToFile());
 
-        boolean isDirectory = false;
-        String status;
+        String status = StatusCode.OK;
         long fileSize = 0L;
         ByteBuffer file = ByteBuffer.allocate(0);
         String contentType = ContentType.getContentType(".html");
 
         if (method.equals("GET") || method.equals("HEAD")) {
-            if (pathToFile.contains("../")) {
+            if (pathToFile.toString().contains("../")) {
                 status = StatusCode.FORBIDDEN;
                 file = buildFile(status);
                 fileSize = file.limit();
             } else {
-                if (FileInformation.isDirectory(rootDir + pathToFile)) {
-                    isDirectory = true;
-                    if (!pathToFile.substring(pathToFile.length() - 1).equals("/")) {
-                        pathToFile +="/";
-                    }
-                    pathToFile += DEFAULT_FILE;
-                }
-                fileSize = FileInformation.read(rootDir + pathToFile);
+                boolean isDirectory = checkDirectory(pathToFile);
+                fileSize = FileInformation.read(pathToFile.toString());
                 if (fileSize != 0L) {
-                    status = StatusCode.OK;
-                    String extension = pathToFile.substring(pathToFile.lastIndexOf('.'));
+                    String extension = pathToFile.substring(pathToFile.toString().lastIndexOf('.'));
                     contentType = ContentType.getContentType(extension);
                 } else {
                     status = isDirectory ? StatusCode.FORBIDDEN : StatusCode.NOT_FOUND;
@@ -67,31 +59,20 @@ class ResponseBuilder {
         }
 
         String headers = buildHeader(status, fileSize, contentType);
-        if (method.equals("HEAD")) {
-            file = ByteBuffer.allocate(0);
-        }
-
-        ByteBuffer bufHeaders = ByteBuffer.wrap(headers.getBytes());
-        ByteBuffer response = ByteBuffer.allocate(bufHeaders.limit() + file.limit());
-        response.put(bufHeaders);
-        byte[] bf = file.array();
-        response.put(bf);
-        response.flip();
-
-        return new DataForClient(response, status, rootDir + pathToFile);
+        ByteBuffer response = mergeBuffers(ByteBuffer.wrap(headers.getBytes()), file);
+        return new DataForClient(response, status, pathToFile.toString(), fileSize, method);
     }
 
     private String buildHeader(String status, long contentLength, String contentType) {
         String rn = "\r\n";
-        @SuppressWarnings("StringBufferReplaceableByString")
-        StringBuilder headers = new StringBuilder();
-        headers.append("HTTP/1.1 ").append(status).append(rn);
-        headers.append("Server: http_server").append(rn);
-        headers.append("Date:").append(getServerDateTime()).append(rn);
-        headers.append("Content-Type: ").append(contentType).append(rn);
-        headers.append("Content-Length: ").append(contentLength).append(rn);
-        headers.append("Connection: close").append(rn).append(rn);
-        return headers.toString();
+        return
+            "HTTP/1.1 "             + status + rn +
+            "Server: http_server"   + rn +
+            "Date:"                 + getServerDateTime() +rn +
+            "Content-Type: "        + contentType + rn +
+            "Content-Length: "      + contentLength + rn +
+            "Connection: close"     + rn + rn;
+
     }
 
     private ByteBuffer buildFile(String status) {
@@ -107,6 +88,26 @@ class ResponseBuilder {
         dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
 
         return dateFormat.format(calendar.getTime());
+    }
+
+    private boolean checkDirectory(StringBuilder pathToFile) {
+        if (FileInformation.isDirectory(pathToFile.toString())) {
+            if (!pathToFile.substring(pathToFile.length() - 1).equals("/")) {
+                pathToFile.append("/");
+            }
+            pathToFile.append(DEFAULT_FILE);
+            return true;
+        }
+        return false;
+    }
+
+    private ByteBuffer mergeBuffers(ByteBuffer b1, ByteBuffer b2) {
+        ByteBuffer result = ByteBuffer.allocate(b1.limit() + b2.limit());
+        result.put(b1);
+        byte[] bf = b2.array();
+        result.put(bf);
+        result.flip();
+        return result;
     }
 
 

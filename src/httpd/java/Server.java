@@ -14,7 +14,6 @@ import java.nio.channels.AsynchronousServerSocketChannel;
 @SuppressWarnings("WeakerAccess")
 public class Server {
 
-    private static final int PORT = 8080;
     private static int poolSize;
     private static String rootDir;
     private static AsynchronousServerSocketChannel listener;
@@ -37,15 +36,17 @@ public class Server {
             rootDir = jct.getRootDir();
             poolSize = jct.getNumCPU();
             String debug = jct.getDebug();
+            int port = jct.getPort();
 
             Level logLevel = (debug.equals("true")) ? Level.DEBUG : Level.ERROR;
             setLoggingLevel(logLevel);
 
             log.debug("Debug mode: " + debug);
+            log.debug("Port: " + port);
             log.debug("NCPU: " + poolSize);
             log.debug("ROOTDIR: " + rootDir);
 
-            listener = AsynchronousServerSocketChannel.open().bind(new InetSocketAddress(PORT));
+            listener = AsynchronousServerSocketChannel.open().bind(new InetSocketAddress(port));
 
         } catch (Exception e) {
             log.error(e.getMessage());

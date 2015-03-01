@@ -32,10 +32,8 @@ public class AsyncSocketListener implements CompletionHandler<AsynchronousSocket
     public void completed(AsynchronousSocketChannel ch, Void att) {
         try {
             listener.accept(null, this);
-            ch.setOption(StandardSocketOptions.TCP_NODELAY, true);
-            ch.setOption(StandardSocketOptions.SO_SNDBUF, 1024*1024);
-            ch.setOption(StandardSocketOptions.SO_RCVBUF, 1024*1024);
-
+            ch.setOption(StandardSocketOptions.SO_SNDBUF, 1024 * 1024);
+            ch.setOption(StandardSocketOptions.SO_RCVBUF, 1024 * 1024);
             executorTaskService.execute(new Task(ch, rootDir));
         } catch (Exception e) {
             log.debug(e.getMessage());
